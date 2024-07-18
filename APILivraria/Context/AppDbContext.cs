@@ -5,12 +5,13 @@ namespace APILivraria.Context
 {
 	public class AppDbContext : DbContext
 	{
-		DbSet<Autor> Autores { get; set; }
-		DbSet<Livro> Livros { get; set; }
+		
 		public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
 		{
 
 		}
+		public DbSet<Autor> Autores { get; set; }
+		public DbSet<Livro> Livros { get; set; }
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<Autor>()
