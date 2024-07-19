@@ -4,12 +4,16 @@ namespace APILivraria.Repository
 {
 	public interface IAutorRepository
 	{
-		IEnumerable<Autor> Autores { get; }
-		public Task<Autor> GetAutorById(int id);
+		//IEnumerable<Autor> Autores { get; }
+		public Task<IEnumerable<Autor>> GetAutoresASync();
 
-		public int Create(Autor autor);
-		public bool Update(Autor autor, int id);
-		public bool Delete(int id);
+        public Task<Autor> GetAutorById(int id);
+
+		public Task<int> CreateAsync(Autor autor);
+		public Task<bool> UpdateAsync(Autor autor, int id);
+
+
+		public Task<bool> DeleteAsync(int id);
 
 	}
 }

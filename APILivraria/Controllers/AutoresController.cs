@@ -6,83 +6,124 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APILivraria.Controllers
 {
-	[Route("api/[controller]")]
-	[ApiController]
-	public class AutoresController : ControllerBase
-	{
-		private readonly IAutorRepository _autorRepository;
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AutoresController : ControllerBase
+    {
+        private readonly IAutorRepository _autorRepository;
 
-		public AutoresController(IAutorRepository autorRepository)
-		{
-			_autorRepository = autorRepository;
-		}
+        public AutoresController(IAutorRepository autorRepository)
+        {
+            _autorRepository = autorRepository;
+        }
 
-		[HttpGet("GetAll")]
-		public ActionResult<IEnumerable<Autor>> Get()
-		{
-			return Ok(_autorRepository.Autores.ToList());
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Autor>>> Get()
+        {
 
-		}
-		[HttpGet("GetById/{id:int}", Name = "GetById")]
-		public async Task<ActionResult<Autor>> Get(int id)
-		{
-			var autor = await _autorRepository.GetAutorById(id);
-			if (autor is null)
-			{
-				return NotFound("autor não encontrado");
-			}
-			return Ok(autor);
-		}
+            try
+            {
+                var listAutor = await _autorRepository.GetAutoresASync();
+                if(listAutor == null) 
+                { 
+                    return NotFound("Não foram encontrados autores"); 
+                }
+                return Ok(listAutor);
+            }
+            catch (Exception ex)
+            {
 
-		[HttpPost("Create")]
-		public ActionResult Create([FromBody] Autor autor)
-		{
-			try
-			{
-				int createid = _autorRepository.Create(autor);
-				if (createid > 0)
-				{
-					return new CreatedAtRouteResult("GetById", new { id = createid }, autor);
-				}
-				return BadRequest("Dados invalidos");
-			}
-			catch (DbUpdateException ex)
-			{
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
 
-				return StatusCode(500, ex.Message);
-			}
-			catch (Exception ex)
-			{
+        }
+        [HttpGet("{id:int}", Name = "GetById")]
+        public async Task<ActionResult<Autor>> GetById(int id)
+        {
+            var autor = await _autorRepository.GetAutorById(id);
+            if (autor is null)
+            {
+                return NotFound("autor não encontrado");
+            }
+            return Ok(autor);
+        }
 
-				return StatusCode(500, ex.Message);
-			}
-		}
+        [HttpPost]
+        public async Task<ActionResult> Create([FromBody] Autor autor)
+        {
+            try
+            {
+                int createid = await _autorRepository.CreateAsync(autor);
+                if (createid > 0)
+                {
+                    return new CreatedAtRouteResult("GetById", new { id = createid }, autor);
+                }
+                return BadRequest("Dados invalidos");
+            }
+            catch (DbUpdateException ex)
+            {
 
-		[HttpPut("Update/{id:int}")]
-		public ActionResult Update(int id, [FromBody] Autor autor)
-		{
-			try
-			{
-				var update = _autorRepository.Update(autor, id);
-				if (update)
-				{
-					return Ok(autor);
-				}
-				return BadRequest("Erro ao fazer a atualização, verifique.");
-			}
-			catch (DbUpdateException ex)
-			{
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
+        }
 
-				return StatusCode(500, ex.Message);
-			}
-			catch (Exception ex)
-			{
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Update(int id, [FromBody] Autor autor)
+        {
+            if (autor == null || id != autor.AutorId)
+            {
+                return BadRequest("Dados inválidos ou ID não corresponde ao autor fornecido.");
+            }
+            try
+            {
+                var update = await _autorRepository.UpdateAsync(autor, id);
+                if (update)
+                {
+                    return Ok(autor);
+                }
+                return BadRequest("Não foi possivel atualizar, verifique os dados.");
+            }
+            catch (DbUpdateException ex)
+            {
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
 
-				return StatusCode(500, ex.Message);
-			}
+        }
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0 )
+            {
+                return BadRequest("Dados inválidos.");
+            }
+            try
+            {
+                var update = await _autorRepository.DeleteAsync(id);
+                if (update)
+                {
+                    return Ok("Cadastro deletado");
+                }
+                return BadRequest("Não foi possivel deletar o autor, verifique os id.");
+            }
+            catch (DbUpdateException ex)
+            {
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
+            catch (Exception ex)
+            {
+                return (StatusCode(StatusCodes.Status500InternalServerError, $"Erro interno: {ex.Message}"));
+            }
 
-			
-		}
+        }
 
-	}
+
+    }
 }
