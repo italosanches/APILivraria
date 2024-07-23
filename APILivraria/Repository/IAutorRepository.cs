@@ -7,10 +7,10 @@ namespace APILivraria.Repository
 		//IEnumerable<Autor> Autores { get; }
 		public Task<IEnumerable<Autor>> GetAutoresASync();
 
-        public Task<Autor> GetAutorById(int id);
+        public Task<Autor> GetAutorByIdAsync(int id);
 
 		public Task<int> CreateAsync(Autor autor);
-		public Task<bool> UpdateAsync(Autor autor, int id);
+		public Task<bool> UpdateAsync(Autor autor);
 
 
 		public Task<bool> DeleteAsync(int id);

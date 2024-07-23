@@ -29,21 +29,15 @@ namespace APILivraria.Repository
         }
 		
 
-		public async Task<Autor> GetAutorById(int id)
+		public async Task<Autor> GetAutorByIdAsync(int id)
 		{
 			try
 			{
-                var autor = await _context.Autores.AsNoTracking().FirstOrDefaultAsync(p => p.AutorId == id);
-                return autor;
-            }
-            catch (DbUpdateException ex)
-            {
-
-                throw new DbUpdateException($"Erro ao pesquisar o autor no banco: {ex.Message}");
+				return await _context.Autores.AsNoTracking().FirstOrDefaultAsync(p => p.AutorId == id);
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro interno do servidor: .{ex.Message}");
+                throw new Exception($"Erro ao pesquisar o ID {id} no servidor: .{ex.Message}");
 
 
             }
@@ -52,16 +46,13 @@ namespace APILivraria.Repository
         public async Task<int> CreateAsync(Autor autor)
         {
             try
-            {
-                if (autor != null)
-                {
-                   await _context.Autores.AddAsync(autor);
-                   await _context.SaveChangesAsync();
+			{
+                if(autor == null ) throw new ArgumentException(nameof(autor));
+				await _context.Autores.AddAsync(autor);
+				await _context.SaveChangesAsync();
 
-                    return autor.AutorId;
-                }
-                return -1;
-            }
+				return autor.AutorId;
+			}
             catch (DbUpdateException ex)
             {
 
@@ -75,21 +66,18 @@ namespace APILivraria.Repository
         }
 
 
-        public async Task<bool> UpdateAsync(Autor autor, int id)
+        public async Task<bool> UpdateAsync(Autor autor)
 		{
 			try
 			{
-				if (id == autor.AutorId)
-				{
-					var autorVerificado = await _context.Autores.FirstOrDefaultAsync(x => x.AutorId.Equals(id));
-                    if (autorVerificado !=null)
-					{
-                        _context.Entry(autorVerificado).CurrentValues.SetValues(autor);
-                        await _context.SaveChangesAsync();
-                        return true;
-                    }
-				}
-				return false;
+				var autorVerificado = await _context.Autores.FirstOrDefaultAsync(x => x.AutorId.Equals(autor.AutorId));
+                if (autorVerificado != null)
+                {
+                    _context.Entry(autorVerificado).CurrentValues.SetValues(autor);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                else { return false; }
 			}
 			catch (DbUpdateException ex)
 			{
