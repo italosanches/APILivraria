@@ -40,7 +40,7 @@ namespace APILivraria.Controllers
         [HttpGet("{id:int}", Name = "GetById")]
         public async Task<ActionResult<Autor>> GetById(int id)
         {
-            var autor = await _autorRepository.GetAutorById(id);
+            var autor = await _autorRepository.GetAutorByIdAsync(id);
             if (autor is null)
             {
                 return NotFound("autor não encontrado");
@@ -71,16 +71,16 @@ namespace APILivraria.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<ActionResult> Update(int id, [FromBody] Autor autor)
+        [HttpPut]
+        public async Task<ActionResult> Update([FromBody] Autor autor)
         {
-            if (autor == null || id != autor.AutorId)
+            if (autor == null)
             {
                 return BadRequest("Dados inválidos ou ID não corresponde ao autor fornecido.");
             }
             try
             {
-                var update = await _autorRepository.UpdateAsync(autor, id);
+                var update = await _autorRepository.UpdateAsync(autor);
                 if (update)
                 {
                     return Ok(autor);
